@@ -1,62 +1,59 @@
-import React, { useState } from "react";
-import { isLoading, useFonts } from "expo-font";
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  TouchableWithoutFeedback,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  ImageBackground,
-} from "react-native";
-import RegistrationScreen from "./Screens/RegistrationScreen/RegistrationScreen";
-import LoginScreen from "./Screens/LoginScreen/LoginScreen";
+import React from "react";
+import { useFonts } from "expo-font";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+
+import IconArrowLeft from "./assets/icon/iconArrowLeft.svg";
+
+import RegistrationScreen from "./Screens/auth/RegistrationScreen";
+import LoginScreen from "./Screens/auth/LoginScreen";
+import Home from "./Screens/Home";
+import CreatePostsScreen from "./Screens/mainScreens/CreatePostsScreen";
+
+const MainStack = createStackNavigator(); // вказує на групу навігаторів
+
 
 export default function App() {
-  const [isRegistered, setIsRegistered] = useState(false);
 
   const [loadFonts] = useFonts({
     "Roboto-Medium": require("./assets/fonts/Roboto/Roboto-Medium.ttf"),
-    "Lobster-Regular": require("./assets/fonts/Lobster/Lobster-Regular.ttf"),
-    "BrunoAceSC-Regular": require("./assets/fonts/Bruno/BrunoAceSC-Regular.ttf")
   });
-
-  useEffect(() => {
-    async function prepare() {
-      await SplashScreen.preventAutoHideAsync();
-    }
-  }, [])
 
   if (!loadFonts) {
     return undefined
   }
 
-  const toggleRegistered = () => {
-    setIsRegistered(!isRegistered);
-  };
-
-
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View>
-        <KeyboardAvoidingView // визначаємо ОС та налаштовуємо поведінку клавіатури
-          behavior={Platform.OS == "ios" ? "padding" : "height"}
-        >
-          <ImageBackground source={require('./assets/PhotoBG.png')} resizeMode="cover" style={styles.image}>
-            {!isRegistered && <RegistrationScreen toggleRegistered={toggleRegistered} />}
-            {isRegistered && <LoginScreen toggleRegistered={toggleRegistered} />}
-          </ImageBackground>
-        </KeyboardAvoidingView>
-      </View>
-    </TouchableWithoutFeedback>
+    <NavigationContainer>
+      <MainStack.Navigator initialRouteName="LoginScreen">
+        <MainStack.Screen options={{ headerShown: false, }} name="RegistrationScreen" component={RegistrationScreen} />
+        <MainStack.Screen options={{ headerShown: false, }} name="LoginScreen" component={LoginScreen} />
+        <MainStack.Screen options={{ headerShown: false, }} name="Home" component={Home} />
+        <MainStack.Screen
+          options={{
+            title: "Создать публикацию",
+            headerStyle: {
+              height: 88,
+              borderBottomWidth: 1,
+            },
+            headerTitleStyle: {
+              marginBottom: -10,
+              fontFamily: "Roboto-Medium",
+              fontSize: 17,
+              lineHeight: 22,
+              letterSpacing: -0.408,
+            },
+            headerBackTitleVisible: false,
+            headerBackImage: () => (
+              <IconArrowLeft width={24} height={24} />
+            ),
+            headerLeftContainerStyle: {
+              left: 16,
+            },
+          }}
+          name="CreatePostsScreen" component={CreatePostsScreen} />
+
+      </MainStack.Navigator>
+    </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  image: {
-    height: "100%",
-    width: "100%",
-  },
-});

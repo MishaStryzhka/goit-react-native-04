@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ImageBackground, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 
-const LoginScreen = ({ toggleRegistered }) => {
+const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState({
         is: true,
         value: "",
@@ -18,9 +18,12 @@ const LoginScreen = ({ toggleRegistered }) => {
     const handlerSignIn = () => {
         if (!email.is) { Alert.alert("Введите адрес электронной почты") }
         else if (!password.is) { Alert.alert("Введите пароль") }
-        else {
+        else if (email.value !== "" && password.value !== "") {
             console.log("email: ", email.value, "  password; ", password.value)
             Alert.alert(`Поздравляем! \u{1F44C}`);
+            navigation.navigate("Home");
+        } else {
+            Alert.alert("Введите ваши данные!!!")
         }
     };
 
@@ -52,40 +55,50 @@ const LoginScreen = ({ toggleRegistered }) => {
     };
 
     return (
-        <View style={styles.registrationContainer}>
-
-            <Text style={styles.titel}>Войти</Text>
-            <TextInput
-                value={email.value}
-                onChangeText={emailHandler}
-                placeholder="Адрес электронной почты"
-                style={email.is ? styles.input : styles.inputEror}
-                keyboardType="email-address"
-            />
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View>
-                <TextInput
-                    value={password.value}
-                    onChangeText={passwordHandler}
-                    placeholder="Пароль"
-                    style={password.is ? styles.input : styles.inputEror}
-                    keyboardType="default"
-                />
-                <TouchableOpacity style={styles.btnShow} onPress={handlerShow}>
-                    <Text>Показать</Text>
-                </TouchableOpacity>
+                <KeyboardAvoidingView // визначаємо ОС та налаштовуємо поведінку клавіатури
+                    behavior={Platform.OS == "ios" ? "padding" : "height"}
+                >
+                    <ImageBackground source={require('../../assets/PhotoBG.png')} resizeMode="cover" style={styles.image}>
+                        <View style={styles.registrationContainer}>
+
+                            <Text style={styles.titel}>Войти</Text>
+                            <TextInput
+                                value={email.value}
+                                onChangeText={emailHandler}
+                                placeholder="Адрес электронной почты"
+                                style={email.is ? styles.input : styles.inputEror}
+                                keyboardType="email-address"
+                            />
+                            <View>
+                                <TextInput
+                                    value={password.value}
+                                    onChangeText={passwordHandler}
+                                    placeholder="Пароль"
+                                    style={password.is ? styles.input : styles.inputEror}
+                                    keyboardType="default"
+                                />
+                                <TouchableOpacity style={styles.btnShow} onPress={handlerShow}>
+                                    <Text>Показать</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <TouchableOpacity style={styles.btnRegister} onPress={handlerSignIn}>
+                                <Text style={styles.btnRegisterText}>Войти</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.btnSignIn} onPress={() => navigation.navigate("RegistrationScreen")}>
+                                <Text style={styles.btnSignInText}>Нет аккаунта? Зарегистрироваться</Text>
+                            </TouchableOpacity>
+
+
+                        </View>
+                    </ImageBackground>
+                </KeyboardAvoidingView>
             </View>
-
-            <TouchableOpacity style={styles.btnRegister} onPress={handlerSignIn}>
-                <Text style={styles.btnRegisterText}>Войти</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.btnSignIn} onPress={() => { toggleRegistered() }}>
-                <Text style={styles.btnSignInText}>Нет аккаунта? Зарегистрироваться</Text>
-            </TouchableOpacity>
-
-
-        </View>
-    )
+        </TouchableWithoutFeedback>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -184,6 +197,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         lineHeight: 19,
         color: "#1B4371",
+    },
+
+    image: {
+        height: "100%",
+        width: "100%",
     },
 
 

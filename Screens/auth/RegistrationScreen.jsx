@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, ImageBackground, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View, TouchableWithoutFeedback } from "react-native";
+import BtnPlus from "../../component/btnPlus";
 
-const RegistrationScreen = ({ toggleRegistered }) => {
+const RegistrationScreen = ({ navigation }) => {
     const [name, setName] = useState({
         is: true,
         value: "",
@@ -29,10 +30,12 @@ const RegistrationScreen = ({ toggleRegistered }) => {
         if (!name.is) { Alert.alert("Введите логин!"); }
         else if (!email.is) { Alert.alert("Введите адрес электронной почты") }
         else if (!password.is) { Alert.alert("Введите пароль") }
-        else {
+        else if (name.value !== "" && email.value !== "" && password.value !== "") {
             console.log("name: ", name.value, "   email: ", email.value, "  password; ", password.value)
-            toggleRegistered()
             Alert.alert(`Поздравляем ${name.value}! Вы зарегистрированы.`);
+            navigation.navigate("Home")
+        } else {
+            Alert.alert("Введите ваши данные!!!")
         }
     };
 
@@ -77,61 +80,68 @@ const RegistrationScreen = ({ toggleRegistered }) => {
     };
 
     return (
-        <View style={styles.registrationContainer}>
-            <View style={styles.imagesContainer}>
-                <TouchableOpacity style={styles.btnAddsImages} onPress={addImages}>
-                    <View style={styles.icon1} />
-                    <View style={styles.icon2} />
-                </TouchableOpacity>
+        <TouchableWithoutFeedback onPress={() => {
+            Keyboard.dismiss();
+        }}>
+            <View style={{ flex: 1, }}>
+                <ImageBackground source={require('../../assets/PhotoBG.png')} style={styles.image}>
+                    <KeyboardAvoidingView // визначаємо ОС та налаштовуємо поведінку клавіатури
+                        behavior={Platform.OS == "ios" ? "padding" : "height"}
+                    >
+                        <View style={styles.registrationContainer}>
+                            <View style={styles.imagesContainer}>
+                                <BtnPlus style={styles.btnPlus} onPress={addImages}></BtnPlus>
+                            </View>
+
+                            <Text style={styles.titel}>Регистрация</Text>
+                            <TextInput
+                                value={name.value}
+                                onChangeText={nameHandler}
+                                placeholder="Логин"
+                                style={name.is ? styles.input : styles.inputEror}
+                                keyboardType="default"
+                            />
+                            <TextInput
+                                value={email.value}
+                                onChangeText={emailHandler}
+                                placeholder="Адрес электронной почты"
+                                style={email.is ? styles.input : styles.inputEror}
+                                keyboardType="email-address"
+                            />
+                            <View>
+                                <TextInput
+                                    value={password.value}
+                                    onChangeText={passwordHandler}
+                                    placeholder="Пароль"
+                                    style={password.is ? styles.input : styles.inputEror}
+                                    keyboardType="default"
+                                />
+                                <TouchableOpacity style={styles.btnShow} onPress={handlerShow}>
+                                    <Text>Показать</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <TouchableOpacity style={styles.btnRegister} onPress={handlerRegister}>
+                                <Text style={styles.btnRegisterText}>Зарегистрироваться</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.btnSignIn} onPress={() => navigation.navigate("LoginScreen")}>
+                                <Text style={styles.btnSignInText}>Уже есть аккаунт? Войти</Text>
+                            </TouchableOpacity>
+
+
+                        </View>
+                    </KeyboardAvoidingView>
+                </ImageBackground>
             </View>
-
-            <Text style={styles.titel}>Регистрация</Text>
-            <TextInput
-                value={name.value}
-                onChangeText={nameHandler}
-                placeholder="Логин"
-                style={name.is ? styles.input : styles.inputEror}
-                keyboardType="default"
-            />
-            <TextInput
-                value={email.value}
-                onChangeText={emailHandler}
-                placeholder="Адрес электронной почты"
-                style={email.is ? styles.input : styles.inputEror}
-                keyboardType="email-address"
-            />
-            <View>
-                <TextInput
-                    value={password.value}
-                    onChangeText={passwordHandler}
-                    placeholder="Пароль"
-                    style={password.is ? styles.input : styles.inputEror}
-                    keyboardType="default"
-                />
-                <TouchableOpacity style={styles.btnShow} onPress={handlerShow}>
-                    <Text>Показать</Text>
-                </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity style={styles.btnRegister} onPress={handlerRegister}>
-                <Text style={styles.btnRegisterText}>Зарегистрироваться</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.btnSignIn} onPress={() => { toggleRegistered() }}>
-                <Text style={styles.btnSignInText}>Уже есть аккаунт? Войти</Text>
-            </TouchableOpacity>
-
-
-        </View>
-    )
+        </TouchableWithoutFeedback>
+    );
 }
 
 const styles = StyleSheet.create({
     // Registration container
 
     registrationContainer: {
-        position: "absolute",
-        bottom: 0,
         height: 500,
         width: "100%",
         borderTopLeftRadius: 25,
@@ -151,31 +161,12 @@ const styles = StyleSheet.create({
         borderRadius: 16,
     },
 
-    // Button "add images"
-
-    btnAddsImages: {
+    btnPlus: {
         position: "absolute",
         right: -12.5,
         bottom: 26.5,
         width: 25,
         height: 25,
-        borderWidth: 1,
-        borderColor: "#FF6C00",
-        borderRadius: 25,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    icon1: {
-        position: "absolute",
-        width: 1,
-        height: 13,
-        backgroundColor: "#FF6C00",
-    },
-    icon2: {
-        position: "absolute",
-        width: 13,
-        height: 1,
-        backgroundColor: "#FF6C00",
     },
 
     // Titel "Регистрация"
@@ -263,8 +254,11 @@ const styles = StyleSheet.create({
         color: "#1B4371",
     },
 
-
-
+    image: {
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "flex-end",
+    },
 });
 
 export default RegistrationScreen;
